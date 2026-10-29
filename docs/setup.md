@@ -1,5 +1,17 @@
 # Local setup on Windows
 
+## Runtime prerequisite
+
+Install standalone **Node.js 22.16 or newer**, matching your bundle architecture (x64 for the current Windows candidate), and make sure `node --version` works in a new PowerShell window.
+
+In Claude Desktop:
+
+1. Open **Settings → Extensions → Advanced settings**.
+2. Turn **Use built-in Node.js for MCP** off.
+3. Restart Claude and open a new chat after configuring the extension.
+
+This setting applies to other Node-based MCP servers too. Claude's built-in runtime prevents starting Node subprocesses through `process.execPath`, which this extension needs for attachment extraction. Standalone Node is therefore required for the supported setup. In a reported version 0.1.1 GMX failure, switching runtimes also restored access with the existing credentials. The precise cause of that runtime-specific authentication failure was not isolated.
+
 ## 1. Save credentials locally
 
 From the source checkout, inspect the scripts, then run either or both commands in PowerShell:
@@ -46,7 +58,7 @@ In Claude Desktop's extension settings, use the advanced/developer **Install Ext
 
 Enable the accounts you configured. Set the GMX region and/or Proton loopback settings and certificate. Choose an existing, local attachment directory if downloads are wanted; the extension creates `LocalMailAttachments` inside it. Network shares and paths involving junctions/symlinks are rejected.
 
-No password field exists in Claude's extension configuration. Restart the extension after changing settings. First call `list_accounts`, then list folders and search one account.
+No password field exists in Claude's extension configuration. Restart the extension after changing account settings; restart Claude after changing the runtime setting. In a new chat, enable Local Mail and first call `list_accounts`, then `list_folders` for the configured account before searching messages. Changing the runtime does not require re-saving credentials.
 
 ## Troubleshooting
 
@@ -54,16 +66,17 @@ No password field exists in Claude's extension configuration. Restart the extens
 - `CREDENTIALS`: run local setup as the same Windows user as Claude. A store copied from another user/machine, corrupted data, or blocked PowerShell policy cannot be read.
 - `CONNECTION`: confirm provider availability, IMAP/app-password access, Bridge sign-in, and certificate. Raw provider errors are deliberately not returned because they may contain private data. Very broad searches may exceed response bounds; narrow filters.
 - `TLS_CERTIFICATE`: certificate-chain or hostname validation failed before authentication. For GMX, check Windows certificate trust and mail-scanning software. For Proton, check the exported Bridge certificate. Never disable certificate verification to resolve it.
-- `AUTHENTICATION`: the provider rejected login; check IMAP access and the saved login/app password.
-- `TRUST_STORE`: the Windows certificate store could not be loaded, or Claude's Node runtime lacks the required API. The extension fails closed. Update Claude Desktop to a runtime supporting `tls.getCACertificates` (Node 22.16 or newer) and check the Windows certificate store.
+- `AUTHENTICATION`: authentication was rejected. First confirm that **Use built-in Node.js for MCP** is off and restart Claude. If the same saved credentials work with standalone Node but fail in Claude, compare the runtimes before replacing the password. If rejection persists with the supported runtime, check IMAP access and the saved login/app password. Capture the exact tool error rather than only the assistant's explanation; never share credentials.
+- `TRUST_STORE`: the Windows certificate store could not be loaded, or the selected Node runtime lacks the required API. The extension fails closed. Use standalone Node 22.16 or newer with `tls.getCACertificates`, confirm the built-in runtime is disabled, and check the Windows certificate store.
 - `STALE_REFERENCE` / `INVALID_CURSOR`: search again.
 - `TOO_LARGE` / `BODY_TOO_LARGE`: the byte limit was exceeded. Narrow the requested content or use your mail client.
 - `EXTRACTION`: unsupported document structure, malformed/encrypted document, or PDF without extractable text. Download supported-size files for manual inspection.
+- `ERR_MCP_NODE_HOST_NOT_NODE`, or extraction failing only inside Claude: check the runtime prerequisite. The built-in runtime cannot launch this extension's parser subprocesses; use standalone Node and restart Claude.
 - `UNSAFE_PATH`: use a normal existing local directory with no reparse points in its path.
 - `BUSY`: wait for existing requests; there are at most two concurrent mail sessions and two extraction processes.
 
 ## Desktop installation smoke checklist
 
-Record Desktop version, Windows architecture, Node runtime version and pass/fail without private data. Verify installation, configuration rendering, disabled-account startup, `list_accounts`, tool consent labels, and local credential setup/replacement/removal. Confirm no passwords appear in settings, logs, manifest, or bundle. Verify with a synthetic credential first. A packaged stdio test alone does not satisfy this checklist.
+Record Desktop version, Windows architecture, standalone Node runtime version, the disabled built-in runtime setting, and pass/fail without private data. Verify installation, configuration rendering, disabled-account startup, `list_accounts`, tool consent labels, and local credential setup/replacement/removal. Confirm no passwords appear in settings, logs, manifest, or bundle. Verify with a synthetic credential first. A packaged stdio test alone does not satisfy this checklist.
 
 Live-account acceptance additionally requires GMX and Proton folder/search/read operations, known unread flags unchanged, a supported attachment read/download, and rejection after replacing the Bridge certificate. Never publish actual mail, credentials or account certificates as evidence.

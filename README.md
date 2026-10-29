@@ -2,7 +2,7 @@
 
 A Windows-only, local MCP extension for reading one GMX mailbox and one Proton Mail Bridge account. Search folders, read messages without marking them read, extract attachment text, and explicitly save attachments locally.
 
-**Status:** early source release. Automated synthetic IMAP/TLS, Windows DPAPI, document parsing and MCP checks are provided. A Claude Desktop installation test and live GMX/Proton account tests must be recorded before distributing a release bundle. See [validation status](docs/validation.md).
+**Status:** early source release. GMX folder listing in Claude Desktop was user-confirmed with version 0.1.1 using standalone Node.js. Automated synthetic IMAP/TLS, Windows DPAPI, document parsing and MCP checks are provided. Remaining Desktop and live-account acceptance checks are tracked in [validation status](docs/validation.md); a public binary release is still pending.
 
 ## Privacy
 
@@ -12,7 +12,9 @@ No SMTP, sending, deletion, flag changes, telemetry, or persistent mailbox cache
 
 ## Build and install
 
-Use Windows and Node.js 22.16 or newer. Build on the same architecture as Claude Desktop's Node runtime (the initial candidate is Windows x64).
+Use Windows and **standalone Node.js 22.16 or newer**, installed and available on PATH. The Node installation must match the bundle architecture; the current candidate requires Windows x64 Node.js.
+
+In Claude Desktop, open **Settings → Extensions → Advanced settings** and turn **Use built-in Node.js for MCP** off. Restart Claude and open a new chat. This is an app-wide setting and also affects other Node-based MCP servers. Claude's built-in runtime blocks the Node subprocesses this extension uses for attachment extraction. Switching to standalone Node also resolved a reported GMX authentication failure without changing the saved credentials; this is not a universal explanation for login errors.
 
 ```powershell
 npm ci --ignore-scripts
