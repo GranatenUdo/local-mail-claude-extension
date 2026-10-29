@@ -10,7 +10,7 @@ Passwords necessarily exist transiently in process memory. This does not defend 
 
 ## Mail and documents
 
-GMX requires normal verified TLS. Proton uses required TLS/STARTTLS on loopback with a locally imported exact certificate pin; authentication cannot precede successful TLS validation. No global certificate-validation bypass is used.
+GMX requires verified TLS and normal hostname validation, using Node's default roots plus Windows-trusted certificate authorities. This includes already trusted enterprise or antivirus mail-scanning roots; those intermediaries can inspect GMX traffic. The extension does not install certificates, change Windows trust, or alter global Node trust. Failure to load the trust store fails closed. Proton uses required TLS/STARTTLS on loopback with a locally imported exact certificate pin and does not inherit Windows roots; authentication cannot precede successful TLS validation. No global certificate-validation bypass is used.
 
 Read-only mailboxes and PEEK fetches preserve flags. The extension has no sending or mailbox mutation tools. Mail and document text is labelled untrusted; prompt-injection defenses are guidance to the model, not a guarantee that a model cannot be influenced by malicious content. Users should review tool requests and avoid granting unrelated tools unnecessary access.
 

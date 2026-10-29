@@ -30,6 +30,8 @@ Removal deletes the stored ciphertext; it is not a forensic secure erase. Removi
 
 Enable POP3/IMAP access in GMX's settings. With two-factor authentication, use a GMX app password where required. Select `net` for German GMX (`imap.gmx.net`) or `com` for international GMX (`imap.gmx.com`). Both use verified TLS on port 993.
 
+Version 0.1.1 adds Windows-trusted certificate authorities to Node's default trust for GMX only. This supports local antivirus mail scanners whose root certificates are already trusted by Windows; those scanners can inspect the connection. Hostname and certificate validation remain enabled. No certificate is installed or trusted automatically by this extension. Proton continues using only its imported certificate and exact pin.
+
 ### Proton
 
 Install and sign into [Proton Mail Bridge](https://proton.me/mail/bridge); a paid Proton plan is required. Bridge must remain running and signed in. Choose combined-address mode for a single account unless you specifically want only one address from split mode.
@@ -51,6 +53,9 @@ No password field exists in Claude's extension configuration. Restart the extens
 - `CONFIGURATION`: check enable flags, region (`net`/`com`), Bridge loopback/port/mode/certificate, and download directory.
 - `CREDENTIALS`: run local setup as the same Windows user as Claude. A store copied from another user/machine, corrupted data, or blocked PowerShell policy cannot be read.
 - `CONNECTION`: confirm provider availability, IMAP/app-password access, Bridge sign-in, and certificate. Raw provider errors are deliberately not returned because they may contain private data. Very broad searches may exceed response bounds; narrow filters.
+- `TLS_CERTIFICATE`: certificate-chain or hostname validation failed before authentication. For GMX, check Windows certificate trust and mail-scanning software. For Proton, check the exported Bridge certificate. Never disable certificate verification to resolve it.
+- `AUTHENTICATION`: the provider rejected login; check IMAP access and the saved login/app password.
+- `TRUST_STORE`: the Windows certificate store could not be loaded, or Claude's Node runtime lacks the required API. The extension fails closed. Update Claude Desktop to a runtime supporting `tls.getCACertificates` (Node 22.16 or newer) and check the Windows certificate store.
 - `STALE_REFERENCE` / `INVALID_CURSOR`: search again.
 - `TOO_LARGE` / `BODY_TOO_LARGE`: the byte limit was exceeded. Narrow the requested content or use your mail client.
 - `EXTRACTION`: unsupported document structure, malformed/encrypted document, or PDF without extractable text. Download supported-size files for manual inspection.

@@ -4,6 +4,9 @@ export const LIMITS = { body: 10 * 1024 ** 2, extraction: 10 * 1024 ** 2, downlo
 const messages = {
   CONFIGURATION: 'Check local extension settings.', CREDENTIALS: 'Run local credential setup; the credential store is missing or unreadable.',
   CONNECTION: 'Mail connection failed. Check provider availability, credentials and TLS settings.',
+  TLS_CERTIFICATE: 'Mail server certificate validation failed. For GMX, check Windows trusted certificates and any mail-scanning software. For Proton, verify the imported Bridge certificate.',
+  AUTHENTICATION: 'The mail provider rejected authentication. Check IMAP access and the saved login or app password.',
+  TRUST_STORE: 'Windows trusted certificates could not be loaded. Check the Windows certificate store and use a Claude Desktop Node runtime supporting tls.getCACertificates (Node 22.16 or newer).',
   TOO_LARGE: 'Content exceeds the allowed byte limit.', BODY_TOO_LARGE: 'Message body exceeds 10 MiB.',
   NOT_FOUND: 'The requested message or part no longer exists.', STALE_REFERENCE: 'Mailbox identity changed; search again.',
   INVALID_CURSOR: 'Search cursor is invalid or expired; search again.', UNSAFE_PATH: 'Download directory is unsafe or unavailable.',

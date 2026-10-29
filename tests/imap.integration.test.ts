@@ -9,6 +9,7 @@ import selfsigned from 'selfsigned';
 import { ImapFlow } from 'imapflow';
 import { connectionOptions } from '../src/config.js';
 import { MailService } from '../src/mail.js';
+import { sessionRunner, classifyConnectionError } from '../src/connections.js';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -93,8 +94,17 @@ test('wrong certificate and refused STARTTLS never transmit authentication', asy
 });
 test('authentication rejection is surfaced and connection can be closed', async () => {
   const f = await fixture('tls', true);
-  try { const client = f.client(); try { await assert.rejects(client.connect()); } finally { client.close(); } }
+  try { const client = f.client(); try { await assert.rejects(client.connect(), error => classifyConnectionError(error).code === 'AUTHENTICATION'); } finally { client.close(); } }
   finally { await f.close(); }
+});
+test('Proton pinning does not read or inherit Windows trusted roots', async t => {
+  const f = await fixture();
+  t.mock.method(tls, 'getCACertificates', () => { throw new Error('Windows trust unavailable'); });
+  try {
+    const client = f.client();
+    assert.ok(Buffer.isBuffer(client.options.tls?.ca));
+    try { await client.connect(); } finally { client.close(); }
+  } finally { await f.close(); }
 });
 test('production DPAPI helper, session isolation, concurrency and reconnect certificate checks', { skip: process.platform !== 'win32' }, async () => {
   const f = await fixture(); const previous = process.env.LOCALAPPDATA;
@@ -109,10 +119,13 @@ test('production DPAPI helper, session isolation, concurrency and reconnect cert
     await assert.rejects(service.folders('proton'), /BUSY/);
     const [message, search] = await Promise.all([a,b]);
     assert.equal(message.text, 'hello'); assert.equal(search.messages.length, 1);
+    await assert.rejects(sessionRunner({ proton: f.account })('proton', async () => {
+      throw Object.assign(new Error('private post-connect diagnostic'), { authenticationFailed: true });
+    }), /CONNECTION/);
     const authCount = f.commands.filter(c => /AUTHENTICATE|LOGIN/.test(c)).length;
     const wrong = await selfsigned.generate([{ name: 'commonName', value: 'changed.invalid' }]);
     await writeFile(f.account.certificate, wrong.cert);
-    await assert.rejects(service.folders('proton'), /CONNECTION/);
+    await assert.rejects(service.folders('proton'), /TLS_CERTIFICATE/);
     assert.equal(f.commands.filter(c => /AUTHENTICATE|LOGIN/.test(c)).length, authCount);
   } finally { if (previous === undefined) delete process.env.LOCALAPPDATA; else process.env.LOCALAPPDATA = previous; await f.close(); }
 });

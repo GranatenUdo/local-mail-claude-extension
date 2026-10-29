@@ -21,7 +21,7 @@ npm run package
 npm run smoke:bundle
 ```
 
-The candidate is written to `artifacts/local-mail-0.1.0-win32-x64.mcpb` on x64. Build outputs are ignored by Git. Follow [local setup](docs/setup.md) to save credentials and configure Claude Desktop.
+The candidate is written to `artifacts/local-mail-0.1.1-win32-x64.mcpb` on x64. Build outputs are ignored by Git. Follow [local setup](docs/setup.md) to save credentials and configure Claude Desktop.
 
 ## Tools
 

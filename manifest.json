@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "local-mail-claude-extension",
   "display_name": "Local Mail — GMX and Proton Bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read-only mail and attachment access on Windows, with locally encrypted credentials.",
   "author": { "name": "GranatenUdo", "url": "https://github.com/GranatenUdo" },
   "homepage": "https://github.com/GranatenUdo/local-mail-claude-extension",

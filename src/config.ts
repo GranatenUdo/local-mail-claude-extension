@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { X509Certificate, timingSafeEqual } from 'node:crypto';
+import nodeTls from 'node:tls';
 import type { ImapFlowOptions } from 'imapflow';
 import { z } from 'zod';
 import { MailError } from './security.js';
@@ -39,11 +40,17 @@ export function connectionOptions(account: AccountConfig, credentials: Credentia
       tls.checkServerIdentity = (_hostname, certificate) => {
         const actual = certificate.fingerprint256 ?? '';
         return actual.length === expected.length && timingSafeEqual(Buffer.from(actual), Buffer.from(expected))
-          ? undefined : new Error('Bridge certificate mismatch');
+          ? undefined : new MailError('TLS_CERTIFICATE');
       };
     } catch { throw new MailError('CONFIGURATION'); }
   } else if (!['imap.gmx.net', 'imap.gmx.com'].includes(account.host) || !account.secure || account.port !== 993) {
     throw new MailError('CONFIGURATION');
+  } else {
+    // Trust the local Windows policy as well as Node's public roots, scoped to GMX only.
+    // Never change global trust or disable hostname/certificate verification.
+    try {
+      tls.ca = [...new Set([...nodeTls.getCACertificates('default'), ...nodeTls.getCACertificates('system')])];
+    } catch { throw new MailError('TRUST_STORE'); }
   }
   return { host: account.host, port: account.port, secure: account.secure,
     ...(account.secure ? {} : { doSTARTTLS: true }),

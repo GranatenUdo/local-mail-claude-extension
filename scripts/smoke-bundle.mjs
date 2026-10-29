@@ -12,7 +12,8 @@ import { minimalEnvironment } from '../dist/security.js';
 
 const exec = promisify(execFile);
 const root = await mkdtemp(path.join(tmpdir(), 'local-mail-bundle-smoke-'));
-const filename = `artifacts/local-mail-0.1.0-win32-${process.arch}.mcpb`;
+const { version } = JSON.parse(await readFile('manifest.json', 'utf8'));
+const filename = `artifacts/local-mail-${version}-win32-${process.arch}.mcpb`;
 const inventory = new Map(JSON.parse(await readFile('artifacts/inventory.json', 'utf8')).map(item => [item.file, item]));
 try {
   await new Promise((resolve, reject) => {
