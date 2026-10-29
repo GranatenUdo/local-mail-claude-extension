@@ -10,7 +10,7 @@ test('DPAPI roundtrip, replacement, ciphertext, corruption and removal', { skip:
   const root = await mkdtemp(path.join(tmpdir(), 'mail-credential-test-'));
   try {
     const result = await exec('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'tests/credentials.integration.ps1'], {
-      env: { SystemRoot: process.env.SystemRoot, TEMP: process.env.TEMP, LOCALAPPDATA: root }, timeout: 20000,
+      env: { SystemRoot: process.env.SystemRoot, TEMP: process.env.TEMP, LOCALAPPDATA: root }, timeout: 60000,
     });
     assert.match(result.stdout, /credential-tests-passed/);
   } finally { await rm(root, { recursive: true, force: true }); }

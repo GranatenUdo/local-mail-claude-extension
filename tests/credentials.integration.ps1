@@ -1,8 +1,13 @@
 $ErrorActionPreference = 'Stop'
+[Console]::Error.WriteLine('[synthetic test] script started')
 . "$PSScriptRoot/../scripts/CredentialStore.ps1"
+[Console]::Error.WriteLine('[synthetic test] store loaded')
 $password = ConvertTo-SecureString 'synthetic-test-password-901' -AsPlainText -Force
+[Console]::Error.WriteLine('[synthetic test] saving')
 Save-MailCredential -Account gmx -Username 'synthetic@example.invalid' -Password $password
+[Console]::Error.WriteLine('[synthetic test] saved')
 $actual = Read-MailCredential -Account gmx | ConvertFrom-Json
+[Console]::Error.WriteLine('[synthetic test] read')
 if ($actual.password -ne 'synthetic-test-password-901') { throw 'Roundtrip failed' }
 $file = Join-Path (Get-MailStore) 'gmx.dpapi'
 $raw = [IO.File]::ReadAllBytes($file)

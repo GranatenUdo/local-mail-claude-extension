@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
-import { mkdtemp, readFile, mkdir, symlink, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, mkdir, symlink, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { loadConfig, connectionOptions } from '../src/config.js';
@@ -39,7 +39,7 @@ test('downloads ignore hostile original filenames and never overwrite', async ()
     const first = await saveDownload(root, '../../CON:secret.exe', Buffer.from('first'));
     const second = await saveDownload(root, '../../CON:secret.exe', Buffer.from('second'));
     assert.notEqual(first, second);
-    assert.equal(path.dirname(first), path.join(root, 'LocalMailAttachments'));
+    assert.equal(path.dirname(first), path.join(await realpath(root), 'LocalMailAttachments'));
     assert.equal(path.extname(first), '.bin');
     assert.equal((await readFile(first)).toString(), 'first');
   } finally { await rm(root, { recursive: true, force: true }); }

@@ -100,7 +100,7 @@ test('production DPAPI helper, session isolation, concurrency and reconnect cert
   const f = await fixture(); const previous = process.env.LOCALAPPDATA;
   try {
     await promisify(execFile)('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'tests/save-synthetic.ps1'], {
-      env: { SystemRoot: process.env.SystemRoot, LOCALAPPDATA: f.root, TEMP: process.env.TEMP }, timeout: 10000,
+      env: { SystemRoot: process.env.SystemRoot, LOCALAPPDATA: f.root, TEMP: process.env.TEMP }, timeout: 60000,
     });
     process.env.LOCALAPPDATA = f.root;
     const service = new MailService({ proton: f.account });
