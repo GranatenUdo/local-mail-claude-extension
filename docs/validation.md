@@ -1,5 +1,7 @@
 # Validation status
 
+[Home](../README.md) · [Setup checklist](setup.md#desktop-installation-smoke-checklist) · [Security](../SECURITY.md)
+
 This file distinguishes automated validation from interactive/live acceptance. Do not treat pending checks as passing.
 
 ## Automated

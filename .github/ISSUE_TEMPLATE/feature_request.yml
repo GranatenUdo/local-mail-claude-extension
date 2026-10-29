@@ -1,0 +1,24 @@
+name: Feature proposal
+description: Describe a problem and propose behavior before implementation.
+title: "[Idea]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep examples synthetic. Read CONTRIBUTING.md before implementing.
+        Maintainers arrange the separate-agent plan review and approval.
+        Mailbox mutation and sending are outside this extension's security boundaries.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What task is difficult today? Do not include actual mail or private data.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the outcome, alternatives, and how it could be validated with synthetic data.
+    validations:
+      required: true

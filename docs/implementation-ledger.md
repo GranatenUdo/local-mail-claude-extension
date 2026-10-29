@@ -1,5 +1,29 @@
 # Implementation ledger
 
+> Historical implementation evidence, not standing authorization to publish or
+> change the repository. Follow [AGENTS.md](../AGENTS.md) for current approval
+> requirements and [validation status](validation.md) for remaining acceptance gates.
+
+## Public repository polish — 2026-10-29
+
+- The user approved the complete plan after a separate agent's adversarial review.
+  Scope: documentation, MIT licensing, contribution templates, offline Markdown
+  checks, dependency maintenance, CI pinning/history, and bundle documentation/license
+  validation. Runtime behavior and version 0.1.1 remain unchanged.
+- Private vulnerability reporting was enabled and read back successfully before
+  the reporting link was added. No other repository settings were changed.
+- Local checks passed: Markdown lint/local links (14 documents), type checking,
+  38 synthetic tests, dependency audit (zero vulnerabilities), source/staged/history
+  scanning, packaging, and bundle smoke including independent license/link checks.
+- A separate final reviewer found no actionable issues and independently reran
+  documentation validation and staged whitespace checking.
+- The linter uses scoped patched transitive dependency overrides; existing
+  production lockfile entries are unchanged.
+- These checks do not complete Desktop/live-account acceptance and do not authorize
+  a public binary release. Hosted CI results belong to the associated pull request.
+
+## Earlier implementation history
+
 Plan: docs/approved-plan.md
 
 - Bootstrap: empty dedicated project, no existing Git history or files. Initialize in place on implementation branch; no existing checkout requires isolation.

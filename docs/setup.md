@@ -1,5 +1,9 @@
 # Local setup on Windows
 
+[Home](../README.md) · [Reference](reference.md) · [Support](support.md)
+
+For source checkout and build commands, start with the [quick start](../README.md#quick-start).
+
 ## Runtime prerequisite
 
 Install standalone **Node.js 22.16 or newer**, matching your bundle architecture (x64 for the current Windows candidate), and make sure `node --version` works in a new PowerShell window.
@@ -59,6 +63,30 @@ In Claude Desktop's extension settings, use the advanced/developer **Install Ext
 Enable the accounts you configured. Set the GMX region and/or Proton loopback settings and certificate. Choose an existing, local attachment directory if downloads are wanted; the extension creates `LocalMailAttachments` inside it. Network shares and paths involving junctions/symlinks are rejected.
 
 No password field exists in Claude's extension configuration. Restart the extension after changing account settings; restart Claude after changing the runtime setting. In a new chat, enable Local Mail and first call `list_accounts`, then `list_folders` for the configured account before searching messages. Changing the runtime does not require re-saving credentials.
+
+## Upgrade or remove
+
+Before upgrading, read the [changelog](https://github.com/GranatenUdo/local-mail-claude-extension/blob/main/CHANGELOG.md)
+and [validation status](validation.md). From a clean source checkout, pull the
+intended reviewed version and repeat the quick-start validation/build commands.
+Install the newly built candidate through Claude Desktop's extension settings,
+verify the settings, restart, and test `list_accounts` then `list_folders`.
+Retain a previous trusted candidate locally if you need to reinstall it.
+
+The DPAPI credential store and downloaded files live outside the extension.
+Updating or uninstalling does not automatically erase them. To remove the
+extension completely:
+
+1. Disable it in Claude Desktop and remove it through the extension settings.
+2. Use the local credential helper's `remove` commands shown above for each account.
+3. Review and manually remove any saved files in your chosen
+   `LocalMailAttachments` directory that you no longer want.
+4. Remove your locally exported Bridge certificate if no other application uses
+   it. Do not remove Windows trust certificates as part of extension cleanup.
+
+Credential removal deletes ciphertext, not a forensic secure erase. Keep the
+trusted helper available until credential removal is finished. Proton Bridge
+itself is a separate application with its own account and local storage.
 
 ## Troubleshooting
 
