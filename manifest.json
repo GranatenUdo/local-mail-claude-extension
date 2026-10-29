@@ -1,0 +1,42 @@
+{
+  "manifest_version": "0.3",
+  "name": "local-mail-claude-extension",
+  "display_name": "Local Mail — GMX and Proton Bridge",
+  "version": "0.1.0",
+  "description": "Read-only mail and attachment access on Windows, with locally encrypted credentials.",
+  "author": { "name": "GranatenUdo", "url": "https://github.com/GranatenUdo" },
+  "homepage": "https://github.com/GranatenUdo/local-mail-claude-extension",
+  "repository": { "type": "git", "url": "https://github.com/GranatenUdo/local-mail-claude-extension" },
+  "server": {
+    "type": "node", "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node", "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "GMX_ENABLED": "${user_config.gmx_enabled}", "GMX_REGION": "${user_config.gmx_region}",
+        "PROTON_ENABLED": "${user_config.proton_enabled}", "PROTON_HOST": "${user_config.proton_host}",
+        "PROTON_PORT": "${user_config.proton_port}", "PROTON_TLS": "${user_config.proton_tls}",
+        "PROTON_CERTIFICATE": "${user_config.proton_certificate}", "DOWNLOAD_ROOT": "${user_config.download_root}"
+      }
+    }
+  },
+  "compatibility": { "platforms": ["win32"], "runtimes": { "node": ">=22.16.0" } },
+  "tools": [
+    { "name": "list_accounts", "description": "List enabled mail accounts" },
+    { "name": "list_folders", "description": "List mailbox folders" },
+    { "name": "search_messages", "description": "Search one folder read-only" },
+    { "name": "read_message", "description": "Read a message without changing flags" },
+    { "name": "read_attachment", "description": "Extract supported attachment text" },
+    { "name": "download_attachment", "description": "Save an attachment locally" }
+  ],
+  "user_config": {
+    "gmx_enabled": { "type": "boolean", "title": "Enable GMX", "description": "Enable after saving GMX credentials with the local setup script.", "default": false },
+    "gmx_region": { "type": "string", "title": "GMX server region", "description": "Enter net for German GMX or com for international GMX.", "default": "net" },
+    "proton_enabled": { "type": "boolean", "title": "Enable Proton Bridge", "description": "Enable after configuring local Bridge credentials and its exported certificate.", "default": false },
+    "proton_host": { "type": "string", "title": "Bridge loopback address", "description": "127.0.0.1 or ::1 only.", "default": "127.0.0.1" },
+    "proton_port": { "type": "number", "title": "Bridge IMAP port", "description": "Use the IMAP port shown in Proton Bridge.", "default": 1143, "min": 1, "max": 65535 },
+    "proton_tls": { "type": "string", "title": "Bridge TLS mode", "description": "Enter starttls or tls, matching Bridge settings.", "default": "starttls" },
+    "proton_certificate": { "type": "file", "title": "Exported Bridge certificate", "description": "PEM public certificate exported locally from Bridge. Required when Proton is enabled; never select a private key.", "default": "" },
+    "download_root": { "type": "directory", "title": "Attachment download directory", "description": "Existing local directory. Files are saved in its LocalMailAttachments subfolder.", "default": "" }
+  },
+  "privacy_policies": ["https://www.gmx.net/unternehmen/datenschutz/", "https://proton.me/legal/privacy"]
+}

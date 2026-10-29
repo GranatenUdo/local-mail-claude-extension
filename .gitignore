@@ -1,0 +1,15 @@
+node_modules/
+dist/
+artifacts/
+.superpowers/
+coverage/
+*.log
+.env*
+*.pem
+*.key
+*.pfx
+*.eml
+*.dpapi
+*.mcpb
+downloads/
+local-data/

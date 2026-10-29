@@ -1,0 +1,41 @@
+{
+  "name": "local-mail-claude-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Read-only GMX and Proton Bridge mail tools for Claude Desktop on Windows",
+  "type": "module",
+  "engines": {
+    "node": ">=22.16"
+  },
+  "scripts": {
+    "pretest": "npm run build",
+    "build": "tsc",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "check": "tsc --noEmit",
+    "package": "npm run build && node scripts/package.mjs",
+    "scan": "node scripts/scan.mjs",
+    "smoke:bundle": "node scripts/smoke-bundle.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "fast-xml-parser": "5.11.2",
+    "html-to-text": "10.0.1",
+    "iconv-lite": "0.7.3",
+    "imapflow": "2.10.0",
+    "pdfjs-dist": "6.4.299",
+    "yauzl": "3.4.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/html-to-text": "9.0.4",
+    "@types/node": "26.6.6",
+    "@types/yauzl": "3.4.0",
+    "@types/yazl": "3.3.1",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "selfsigned": "5.5.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "yazl": "3.3.1"
+  }
+}
