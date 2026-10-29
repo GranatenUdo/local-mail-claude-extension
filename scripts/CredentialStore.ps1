@@ -1,5 +1,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+# Use only Windows PowerShell's own modules. Avoid incompatible/custom module discovery and cold-cache scans of unrelated installed modules.
+$env:PSModulePath = [IO.Path]::Combine($PSHOME, 'Modules')
 Add-Type -AssemblyName System.Security
 
 function Get-MailStore {

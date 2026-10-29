@@ -1,13 +1,13 @@
 $ErrorActionPreference = 'Stop'
-[Console]::Error.WriteLine('[synthetic test] script started')
+[Console]::Error.WriteLine('[synthetic test] script started ' + [DateTime]::UtcNow.ToString('O'))
 . "$PSScriptRoot/../scripts/CredentialStore.ps1"
-[Console]::Error.WriteLine('[synthetic test] store loaded')
+[Console]::Error.WriteLine('[synthetic test] store loaded ' + [DateTime]::UtcNow.ToString('O'))
 $password = ConvertTo-SecureString 'synthetic-test-password-901' -AsPlainText -Force
-[Console]::Error.WriteLine('[synthetic test] saving')
+[Console]::Error.WriteLine('[synthetic test] saving ' + [DateTime]::UtcNow.ToString('O'))
 Save-MailCredential -Account gmx -Username 'synthetic@example.invalid' -Password $password
-[Console]::Error.WriteLine('[synthetic test] saved')
+[Console]::Error.WriteLine('[synthetic test] saved ' + [DateTime]::UtcNow.ToString('O'))
 $actual = Read-MailCredential -Account gmx | ConvertFrom-Json
-[Console]::Error.WriteLine('[synthetic test] read')
+[Console]::Error.WriteLine('[synthetic test] read ' + [DateTime]::UtcNow.ToString('O'))
 if ($actual.password -ne 'synthetic-test-password-901') { throw 'Roundtrip failed' }
 $file = Join-Path (Get-MailStore) 'gmx.dpapi'
 $raw = [IO.File]::ReadAllBytes($file)

@@ -13,5 +13,6 @@ test('DPAPI roundtrip, replacement, ciphertext, corruption and removal', { skip:
       env: { SystemRoot: process.env.SystemRoot, TEMP: process.env.TEMP, LOCALAPPDATA: root }, timeout: 60000,
     });
     assert.match(result.stdout, /credential-tests-passed/);
+    if (process.env.CI) process.stderr.write(result.stderr);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
