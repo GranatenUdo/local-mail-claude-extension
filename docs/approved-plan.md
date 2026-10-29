@@ -1,5 +1,10 @@
 # Approved implementation plan
 
+> Historical record of the initial implementation and 0.1.1 follow-up.
+> This is not authorization for new work. The original no-license decision below
+> was superseded by the approved MIT adoption; see [LICENSE](../LICENSE).
+> Follow [AGENTS.md](../AGENTS.md) for current change approval requirements.
+
 Approved by the user on 2026-10-29 after an independent adversarial review and re-review resolved eight findings.
 
 Build a Windows-only TypeScript stdio MCP extension for one GMX and one Proton Bridge account. Expose list_accounts, list_folders, search_messages, read_message, read_attachment, download_attachment. Never mutate mailboxes. Use EXAMINE and PEEK. No background sync, persistent mail cache, or telemetry.

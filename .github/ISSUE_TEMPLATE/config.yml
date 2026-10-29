@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Setup and support
+    url: https://github.com/GranatenUdo/local-mail-claude-extension/blob/main/docs/support.md
+    about: Troubleshooting and safe information to include when asking for help.
+  - name: Private security report
+    url: https://github.com/GranatenUdo/local-mail-claude-extension/security/advisories/new
+    about: Report vulnerabilities privately using a synthetic reproduction, never mailbox data.

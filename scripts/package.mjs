@@ -23,10 +23,12 @@ async function add(file) {
   files.set(file.replaceAll('\\', '/'), bytes);
 }
 // First-party artifact allowlist: no credentials, tests, local state, source maps or diagnostics.
-for (const name of ['manifest.json', 'README.md', 'SECURITY.md', 'docs/setup.md', 'scripts/credentials.ps1', 'scripts/CredentialStore.ps1']) await add(name);
+for (const name of ['manifest.json', 'LICENSE', 'README.md', 'SECURITY.md',
+  'docs/setup.md', 'docs/architecture.md', 'docs/reference.md', 'docs/support.md', 'docs/validation.md',
+  'scripts/credentials.ps1', 'scripts/CredentialStore.ps1']) await add(name);
 for (const name of await readdir('dist')) if (/^[a-z-]+\.js$/.test(name)) await add(`dist/${name}`);
 const pkg = JSON.parse(await readFile('package.json', 'utf8'));
-files.set('package.json', Buffer.from(JSON.stringify({ name: pkg.name, version: pkg.version, private: true, type: 'module', engines: pkg.engines })));
+files.set('package.json', Buffer.from(JSON.stringify({ name: pkg.name, version: pkg.version, private: true, type: 'module', engines: pkg.engines, license: pkg.license })));
 // Only installed production dependency directories, as resolved by the locked npm graph.
 const dependencies = execFileSync(process.execPath, [process.env.npm_execpath, 'ls', '--omit=dev', '--all', '--parseable'], { encoding: 'utf8', windowsHide: true }).trim().split(/\r?\n/).slice(1);
 async function dependencyFiles(directory) {

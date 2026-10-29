@@ -1,5 +1,19 @@
 # Security and privacy boundaries
 
+[Home](README.md) · [Setup](docs/setup.md) · [Validation](docs/validation.md)
+
+## Reporting a vulnerability
+
+Use [GitHub private vulnerability reporting](https://github.com/GranatenUdo/local-mail-claude-extension/security/advisories/new).
+Private reporting is enabled for this repository. Describe affected versions,
+impact, and a minimal synthetic reproduction. Do not publish exploit details in
+public issues while a report is being assessed.
+
+Even private reports must not include actual credentials, mailbox messages,
+attachments, account certificates, or local diagnostics. There is no guaranteed
+response SLA. The project is an early source release; fixes target the current
+source version, with no promise of maintenance for older versions.
+
 Report security issues without including credentials, messages, account certificates, or private diagnostics. Do not open a public issue containing private mailbox data.
 
 ## Local credentials
@@ -22,4 +36,4 @@ Returned content enters the Claude conversation and is subject to the user's Cla
 
 Downloads use generated names under a dedicated local subdirectory, reject reparse-point traversal, and never overwrite or auto-open files. This prevents attacker-controlled email filenames from choosing paths. It does not defend against a compromised same-user process racing filesystem checks. Downloads remain ordinary persistent files and inherit storage encryption protection.
 
-Only synthetic fixtures belong in Git. Packaging uses a first-party file allowlist and installed production dependency graph, excluding credential stores and development state. Public binary release requires a recorded Claude Desktop installation smoke test. Dependency licenses are preserved inside the bundle; there is no license grant for this repository's original code.
+Only synthetic fixtures belong in Git. Packaging uses a first-party file allowlist and installed production dependency graph, excluding credential stores and development state. Public binary release requires a recorded Claude Desktop installation smoke test. Dependency licenses are preserved inside the bundle; original project code is licensed under [MIT](LICENSE).

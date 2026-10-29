@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 const roots = ['src', 'tests', 'scripts', 'docs', 'schemas', '.github'];
-const top = ['.gitignore', 'AGENTS.md', 'README.md', 'SECURITY.md', 'manifest.json', 'package.json', 'package-lock.json', 'tsconfig.json'];
+const top = ['.gitignore', '.markdownlint-cli2.jsonc', 'AGENTS.md', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'LICENSE', 'manifest.json', 'package.json', 'package-lock.json', 'tsconfig.json'];
 async function walk(directory) {
   const result = [];
   for (const item of await readdir(directory, { withFileTypes: true })) {

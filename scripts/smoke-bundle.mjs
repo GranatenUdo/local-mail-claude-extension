@@ -8,6 +8,8 @@ import yauzl from 'yauzl';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { createHash } from 'node:crypto';
+import assert from 'node:assert/strict';
+import { checkLinks } from './docs-links.mjs';
 import { minimalEnvironment } from '../dist/security.js';
 
 const exec = promisify(execFile);
@@ -38,6 +40,20 @@ try {
     });
   });
   if (inventory.size) throw new Error('Bundle missing files');
+  // Independent requirements: a packager and its inventory can agree while
+  // both omit a required license or user guide.
+  const license = await readFile(path.join(root, 'LICENSE'), 'utf8');
+  assert.equal(license, await readFile('LICENSE', 'utf8'));
+  assert.match(license, /^MIT License/);
+  assert.match(license, /Copyright \(c\) 2026 GranatenUdo/);
+  assert.match(license, /Permission is hereby granted, free of charge/);
+  assert.match(license, /THE SOFTWARE IS PROVIDED "AS IS"/);
+  for (const name of ['package.json', 'manifest.json']) {
+    assert.equal(JSON.parse(await readFile(path.join(root, name), 'utf8')).license, 'MIT');
+  }
+  const docs = ['README.md', 'SECURITY.md', 'docs/setup.md', 'docs/architecture.md',
+    'docs/reference.md', 'docs/support.md', 'docs/validation.md'];
+  assert.deepEqual(await checkLinks(root, docs), [], 'Bundled documentation must have valid local links');
   const transport = new StdioClientTransport({ command: process.execPath, args: [path.join(root, 'dist/index.js')],
     env: { ...minimalEnvironment(), GMX_ENABLED: 'false', PROTON_ENABLED: 'false' }, stderr: 'pipe' });
   const client = new Client({ name: 'bundle-smoke', version: '1' });
@@ -55,7 +71,7 @@ try {
   // Loading PDF.js from this installation checks its native optional dependency and worker layout.
   const pdfUrl = pathToFileURL(path.join(root, 'node_modules/pdfjs-dist/legacy/build/pdf.mjs')).href;
   await exec(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(pdfUrl)});`], { env: minimalEnvironment(), timeout: 30000, windowsHide: true });
-  console.log('Bundle inventory, isolated stdio MCP and parser/PDF runtime smoke passed. Claude Desktop UI installation remains a separate manual check.');
+  console.log('Bundle inventory, MIT license, documentation links, isolated stdio MCP and parser/PDF runtime smoke passed. Claude Desktop UI installation remains a separate manual check.');
 } finally {
   if (!root.startsWith(path.join(tmpdir(), 'local-mail-bundle-smoke-'))) throw new Error('Unsafe cleanup path');
   await rm(root, { recursive: true, force: true });
