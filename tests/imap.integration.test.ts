@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import tls from 'node:tls';
 import net from 'node:net';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import selfsigned from 'selfsigned';
@@ -14,10 +14,11 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const certificates = selfsigned.generate([{ name: 'commonName', value: 'synthetic-bridge.invalid' }], { keySize: 2048, algorithm: 'sha256' });
-async function fixture(mode: 'tls' | 'refuse-starttls' | 'starttls' = 'tls', rejectAuth = false) {
-  const pair = await certificates;
+async function fixture(mode: 'tls' | 'refuse-starttls' | 'starttls' = 'tls', rejectAuth = false,
+  pair?: Awaited<typeof certificates>, port = 0) {
+  const initialPair = pair ?? await certificates;
   const root = await mkdtemp(path.join(tmpdir(), 'mail-tls-test-'));
-  const certPath = path.join(root, 'synthetic.pem'); await writeFile(certPath, pair.cert);
+  const certPath = path.join(root, 'synthetic.pem'); await writeFile(certPath, initialPair.cert);
   const commands: string[] = []; const sockets = new Set<net.Socket>();
   function protocol(socket: net.Socket, greeting = true, secured = mode === 'tls') {
     sockets.add(socket); socket.on('error', () => {}); socket.on('close', () => sockets.delete(socket));
@@ -33,7 +34,7 @@ async function fixture(mode: 'tls' | 'refuse-starttls' | 'starttls' = 'tls', rej
         if (command === 'CAPABILITY') { socket.write(`* CAPABILITY IMAP4rev1 AUTH=PLAIN${mode === 'starttls' && !secured ? ' STARTTLS' : ''}\r\n`); ok(); }
         else if (command === 'STARTTLS' && mode === 'starttls') {
           socket.write(`${tag} OK upgrade\r\n`); socket.removeListener('data', data);
-          const secure = new tls.TLSSocket(socket, { isServer: true, secureContext: tls.createSecureContext({ key: pair.private, cert: pair.cert }) });
+          const secure = new tls.TLSSocket(socket, { isServer: true, secureContext: tls.createSecureContext({ key: initialPair.private, cert: initialPair.cert }) });
           protocol(secure, false, true); return;
         }
         else if (/^(AUTHENTICATE|LOGIN) /.test(command)) { socket.write(`${tag} ${rejectAuth ? 'NO rejected' : 'OK authenticated'}\r\n`); }
@@ -58,13 +59,14 @@ async function fixture(mode: 'tls' | 'refuse-starttls' | 'starttls' = 'tls', rej
     };
     socket.on('data', data);
   }
-  const server = mode === 'tls' ? tls.createServer({ key: pair.private, cert: pair.cert }, socket => protocol(socket)) : net.createServer(socket => protocol(socket));
+  const server = mode === 'tls' ? tls.createServer({ key: initialPair.private, cert: initialPair.cert }, socket => protocol(socket)) : net.createServer(socket => protocol(socket));
   server.on('tlsClientError', () => {});
-  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+  await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(port, '127.0.0.1', resolve); });
   const address = server.address() as net.AddressInfo;
   const account = { id: 'proton' as const, host: '127.0.0.1', port: address.port, secure: mode === 'tls', certificate: certPath };
   function client() { const client = new ImapFlow(connectionOptions(account, { username: 'synthetic-user', password: 'synthetic-password' })); client.on('error', () => {}); return client; }
-  return { account, commands, client, pair, root, close: async () => { for (const socket of sockets) socket.destroy(); await new Promise<void>(resolve => server.close(() => resolve())); await rm(root, { recursive: true, force: true }); } };
+  const interruptSecondConnection = () => server.once('connection', () => server.once('connection', socket => socket.destroy()));
+  return { account, commands, client, pair: initialPair, root, interruptSecondConnection, close: async () => { for (const socket of sockets) socket.destroy(); await new Promise<void>(resolve => server.close(() => resolve())); await rm(root, { recursive: true, force: true }); } };
 }
 for (const mode of ['tls','starttls'] as const) test(`real IMAP ${mode}: pinned certificate authenticates, read uses EXAMINE/PEEK only`, async () => {
   const f = await fixture(mode);
@@ -91,6 +93,54 @@ test('wrong certificate and refused STARTTLS never transmit authentication', asy
   try { const client = plain.client(); try { await assert.rejects(client.connect()); } finally { client.close(); }
     assert.equal(plain.commands.some(line => /AUTHENTICATE|LOGIN/.test(line)), false);
   } finally { await plain.close(); }
+});
+for (const mode of ['starttls', 'tls'] as const) test(`repair, restart and rotation over ${mode}`, { skip: process.platform !== 'win32' }, async () => {
+  const local = await mkdtemp(path.join(tmpdir(), 'pin-repair-'));
+  let server = await fixture(mode);
+  const port = server.account.port;
+  const certPath = path.join(local, 'LocalMailClaudeExtension', `bridge-ipv4-${port}-${mode}.pem`);
+  const account = { ...server.account, certificate: certPath };
+  const invoke = (script: string, args: string[]) => promisify(execFile)('powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script, '-Port', String(port), '-Mode', mode, ...args],
+    { env: { ...process.env, LOCALAPPDATA: local }, windowsHide: true, timeout: 60000 });
+  const repair = () => invoke('tests/repair-synthetic.ps1', ['-FixtureProcess', String(process.pid)]);
+  const connect = async () => {
+    const client = new ImapFlow(connectionOptions(account, { username: 'synthetic', password: 'synthetic' }));
+    client.on('error', () => {});
+    try { await client.connect(); } finally { client.close(); }
+  };
+  try {
+    await repair();
+    await connect();
+    await server.close();
+    server = await fixture(mode, false, await certificates, port);
+    await connect(); // New listener, unchanged pin.
+    await server.close();
+    const rotated = await selfsigned.generate([{ name: 'commonName', value: 'rotated.invalid' }]);
+    server = await fixture(mode, false, rotated, port);
+    await assert.rejects(connect);
+    const prior = await readFile(certPath);
+    await assert.rejects(invoke('scripts/repair-bridge.ps1', ['-Action', 'Repair'])); // Real ownership gate rejects Node.
+    assert.deepEqual(await readFile(certPath), prior);
+    server.interruptSecondConnection();
+    await assert.rejects(repair);
+    assert.deepEqual(await readFile(certPath), prior);
+    await repair();
+    assert.equal(server.commands.some(command => /LOGIN|AUTHENTICATE/i.test(command)), false);
+    await connect(); // Same account config and path, new PEM.
+    const verified = await readFile(certPath);
+    assert.notDeepEqual(verified, prior);
+    await server.close();
+    const expired = await selfsigned.generate([{ name: 'commonName', value: 'expired.invalid' }], {
+      notBeforeDate: new Date('2020-01-01'), notAfterDate: new Date('2021-01-01'),
+    });
+    server = await fixture(mode, false, expired, port);
+    await assert.rejects(repair);
+    assert.deepEqual(await readFile(certPath), verified);
+    await server.close();
+    await assert.rejects(repair); // Disconnected Bridge.
+    assert.deepEqual(await readFile(certPath), verified);
+  } finally { await server.close(); await rm(local, { recursive: true, force: true }); }
 });
 test('authentication rejection is surfaced and connection can be closed', async () => {
   const f = await fixture('tls', true);

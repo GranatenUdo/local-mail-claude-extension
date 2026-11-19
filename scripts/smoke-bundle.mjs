@@ -54,6 +54,9 @@ try {
   const docs = ['README.md', 'SECURITY.md', 'docs/setup.md', 'docs/architecture.md',
     'docs/reference.md', 'docs/support.md', 'docs/validation.md'];
   assert.deepEqual(await checkLinks(root, docs), [], 'Bundled documentation must have valid local links');
+  for (const file of ['repair-bridge.ps1', 'BridgeRepair.ps1', 'BridgeTls.cs', 'CredentialStore.ps1']) {
+    await readFile(path.join(root, 'scripts', file));
+  }
   const transport = new StdioClientTransport({ command: process.execPath, args: [path.join(root, 'dist/index.js')],
     env: { ...minimalEnvironment(), GMX_ENABLED: 'false', PROTON_ENABLED: 'false' }, stderr: 'pipe' });
   const client = new Client({ name: 'bundle-smoke', version: '1' });

@@ -13,7 +13,7 @@ async function walk(directory) {
 }
 const allowed = new Set(top);
 for (const root of roots) for (const file of await walk(root)) {
-  if (!/\.(?:ts|mjs|ps1|md|json|yml|yaml)$/.test(file) && file !== 'schemas/MCPB-LICENSE') throw new Error(`Unapproved source artifact: ${file}`);
+  if (!/\.(?:ts|mjs|ps1|md|json|yml|yaml)$/.test(file) && file !== 'schemas/MCPB-LICENSE' && file !== 'scripts/BridgeTls.cs') throw new Error(`Unapproved source artifact: ${file}`);
   allowed.add(file);
 }
 const staged = execFileSync('git', ['diff', '--cached', '--name-only', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
