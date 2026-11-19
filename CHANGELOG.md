@@ -1,10 +1,13 @@
 # Changelog
 
-This records source changes, not published binary releases. Version 0.1.1 remains
-an early source release; see [validation status](docs/validation.md) for acceptance
-gates. Dates below come from repository history.
+This records source changes. See [validation status](docs/validation.md) for
+public binary acceptance criteria.
 
 ## Unreleased
+
+- Source version 0.1.2 adds a Windows Start menu shortcut to repair the selected
+  Proton Bridge certificate after rotation. Setup verifies the local Bridge
+  process and preserves the original certificate export.
 
 - Adopt MIT licensing for original project code and include it in local bundles.
 - Improve installation navigation, architecture, configuration/tool reference,

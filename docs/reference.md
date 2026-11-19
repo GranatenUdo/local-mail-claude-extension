@@ -2,7 +2,7 @@
 
 [Home](../README.md) · [Setup](setup.md) · [Architecture](architecture.md)
 
-This describes source version 0.1.1. Configure settings in Claude Desktop after
+This describes source version 0.1.2. Configure settings in Claude Desktop after
 completing [local setup](setup.md). Credentials are handled by the local
 PowerShell helper, never these settings.
 
@@ -16,7 +16,7 @@ PowerShell helper, never these settings.
 | `proton_host` | `127.0.0.1` | `127.0.0.1` or `::1` only |
 | `proton_port` | `1143` | Integer 1–65535; match Bridge's IMAP port |
 | `proton_tls` | `starttls` | `starttls` or `tls`; match Bridge |
-| `proton_certificate` | Empty | Local exported public PEM certificate; required when Proton is enabled |
+| `proton_certificate` | Empty | Public PEM from repair setup or a Bridge export. Required when Proton is enabled. |
 | `download_root` | Empty | Existing local directory; required only for downloads |
 
 Restart the extension after configuration changes. Invalid settings fail with

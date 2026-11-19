@@ -31,7 +31,7 @@ npm run package
 npm run smoke:bundle
 ```
 
-The candidate is written to `artifacts/local-mail-0.1.1-win32-x64.mcpb` on x64. Build outputs are ignored by Git. Follow [local setup](docs/setup.md) to save credentials and configure Claude Desktop.
+The candidate is written to `artifacts/local-mail-0.1.2-win32-x64.mcpb` on x64. Build outputs are ignored by Git. Follow [local setup](docs/setup.md) to save credentials, configure Claude Desktop and install the **Repair Proton Bridge Certificate** shortcut.
 
 In a new Claude chat, enable Local Mail and start with `list_accounts`, then `list_folders` for the configured account. Local validation does not replace the [Desktop installation checklist](docs/setup.md#desktop-installation-smoke-checklist).
 

@@ -25,7 +25,7 @@ async function add(file) {
 // First-party artifact allowlist: no credentials, tests, local state, source maps or diagnostics.
 for (const name of ['manifest.json', 'LICENSE', 'README.md', 'SECURITY.md',
   'docs/setup.md', 'docs/architecture.md', 'docs/reference.md', 'docs/support.md', 'docs/validation.md',
-  'scripts/credentials.ps1', 'scripts/CredentialStore.ps1']) await add(name);
+  'scripts/credentials.ps1', 'scripts/CredentialStore.ps1', 'scripts/BridgeTls.cs', 'scripts/BridgeRepair.ps1', 'scripts/repair-bridge.ps1']) await add(name);
 for (const name of await readdir('dist')) if (/^[a-z-]+\.js$/.test(name)) await add(`dist/${name}`);
 const pkg = JSON.parse(await readFile('package.json', 'utf8'));
 files.set('package.json', Buffer.from(JSON.stringify({ name: pkg.name, version: pkg.version, private: true, type: 'module', engines: pkg.engines, license: pkg.license })));

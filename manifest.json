@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "local-mail-claude-extension",
   "display_name": "Local Mail — GMX and Proton Bridge",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "description": "Read-only mail and attachment access on Windows, with locally encrypted credentials.",
   "author": { "name": "GranatenUdo", "url": "https://github.com/GranatenUdo" },
@@ -32,11 +32,11 @@
   "user_config": {
     "gmx_enabled": { "type": "boolean", "title": "Enable GMX", "description": "Enable after saving GMX credentials with the local setup script.", "default": false },
     "gmx_region": { "type": "string", "title": "GMX server region", "description": "Enter net for German GMX or com for international GMX.", "default": "net" },
-    "proton_enabled": { "type": "boolean", "title": "Enable Proton Bridge", "description": "Enable after configuring local Bridge credentials and its exported certificate.", "default": false },
+    "proton_enabled": { "type": "boolean", "title": "Enable Proton Bridge", "description": "Enable after configuring local Bridge credentials and its public certificate.", "default": false },
     "proton_host": { "type": "string", "title": "Bridge loopback address", "description": "127.0.0.1 or ::1 only.", "default": "127.0.0.1" },
     "proton_port": { "type": "number", "title": "Bridge IMAP port", "description": "Use the IMAP port shown in Proton Bridge.", "default": 1143, "min": 1, "max": 65535 },
     "proton_tls": { "type": "string", "title": "Bridge TLS mode", "description": "Enter starttls or tls, matching Bridge settings.", "default": "starttls" },
-    "proton_certificate": { "type": "file", "title": "Exported Bridge certificate", "description": "PEM public certificate exported locally from Bridge. Required when Proton is enabled; never select a private key.", "default": "" },
+    "proton_certificate": { "type": "file", "title": "Bridge public certificate", "description": "Choose the PEM from repair setup or a public certificate exported from Bridge. Required when Proton is enabled.", "default": "" },
     "download_root": { "type": "directory", "title": "Attachment download directory", "description": "Existing local directory. Files are saved in its LocalMailAttachments subfolder.", "default": "" }
   },
   "privacy_policies": ["https://www.gmx.net/unternehmen/datenschutz/", "https://proton.me/legal/privacy"]

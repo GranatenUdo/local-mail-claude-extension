@@ -52,9 +52,15 @@ Version 0.1.1 adds Windows-trusted certificate authorities to Node's default tru
 
 Install and sign into [Proton Mail Bridge](https://proton.me/mail/bridge); a paid Proton plan is required. Bridge must remain running and signed in. Choose combined-address mode for a single account unless you specifically want only one address from split mode.
 
-Copy the IMAP loopback address, port and TLS mode from Bridge. Export Bridge's **public certificate** through its certificate settings and keep the PEM file locally. Configure that file in the extension. Do not provide a private key or install blanket certificate exceptions.
+Copy the IMAP address, port and TLS mode from Bridge. With Bridge running, run this once from the checkout or a trusted extracted candidate. Substitute the values shown in Bridge if they differ.
 
-The extension accepts only `127.0.0.1` or `::1`, and `starttls` or `tls`. It verifies the certificate chain using your imported certificate and requires an exact certificate fingerprint match before authenticating. When Bridge regenerates its certificate, verify and re-export it locally; reconnecting with an old pin must fail.
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\repair-bridge.ps1 -Action Setup -Address 127.0.0.1 -Port 1143 -Mode starttls
+```
+
+Choose the printed PEM path in Claude's **Bridge public certificate** setting (called **Exported Bridge certificate** in 0.1.1). Save the setting and reload the extension once. The Start menu now contains **Repair Proton Bridge Certificate**. Use it if the certificate changes, then retry the mail request. An ordinary restart with the same certificate needs no repair. Run setup again if the IMAP endpoint changes and select the newly printed path. Setup keeps any earlier export intact.
+
+The helper verifies the signed Bridge process on the live connection and saves only its public certificate. It supports the default protected Program Files installation, either loopback address and both TLS modes. If certificate verification fails, the previous PEM stays in place. For other installations, export the public certificate through Bridge's settings and select that PEM directly. Keep the private key out of the extension. If TLS succeeds but login fails after a vault reset, update the saved Bridge IMAP credentials in step 1.
 
 ## 3. Install the candidate in Claude Desktop
 
@@ -83,6 +89,9 @@ extension completely:
    `LocalMailAttachments` directory that you no longer want.
 4. Remove your locally exported Bridge certificate if no other application uses
    it. Do not remove Windows trust certificates as part of extension cleanup.
+5. If you installed certificate repair, remove its Start menu shortcut. Under
+   `%LOCALAPPDATA%\LocalMailClaudeExtension`, remove the `BridgeRepair` folder
+   and the helper's endpoint-specific PEM and lock files.
 
 Credential removal deletes ciphertext, not a forensic secure erase. Keep the
 trusted helper available until credential removal is finished. Proton Bridge
@@ -93,7 +102,7 @@ itself is a separate application with its own account and local storage.
 - `CONFIGURATION`: check enable flags, region (`net`/`com`), Bridge loopback/port/mode/certificate, and download directory.
 - `CREDENTIALS`: run local setup as the same Windows user as Claude. A store copied from another user/machine, corrupted data, or blocked PowerShell policy cannot be read.
 - `CONNECTION`: confirm provider availability, IMAP/app-password access, Bridge sign-in, and certificate. Raw provider errors are deliberately not returned because they may contain private data. Very broad searches may exceed response bounds; narrow filters.
-- `TLS_CERTIFICATE`: certificate-chain or hostname validation failed before authentication. For GMX, check Windows certificate trust and mail-scanning software. For Proton, check the exported Bridge certificate. Never disable certificate verification to resolve it.
+- `TLS_CERTIFICATE`: certificate validation failed before authentication. For GMX, check Windows certificate trust and mail-scanning software. For Proton, run the repair shortcut if configured, or refresh the selected public export.
 - `AUTHENTICATION`: authentication was rejected. First confirm that **Use built-in Node.js for MCP** is off and restart Claude. If the same saved credentials work with standalone Node but fail in Claude, compare the runtimes before replacing the password. If rejection persists with the supported runtime, check IMAP access and the saved login/app password. Capture the exact tool error rather than only the assistant's explanation; never share credentials.
 - `TRUST_STORE`: the Windows certificate store could not be loaded, or the selected Node runtime lacks the required API. The extension fails closed. Use standalone Node 22.16 or newer with `tls.getCACertificates`, confirm the built-in runtime is disabled, and check the Windows certificate store.
 - `STALE_REFERENCE` / `INVALID_CURSOR`: search again.
